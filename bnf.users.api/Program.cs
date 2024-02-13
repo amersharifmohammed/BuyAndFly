@@ -1,4 +1,3 @@
-
 using bnf.users.api;
 using bnf.users.api.Providers;
 using bnf.users.api.Repository;
@@ -12,6 +11,19 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Add CORS support
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "AllowSpecificOrigin",
+                      builder =>
+                      {
+                          builder.WithOrigins("http://localhost:3000") // Replace with your React application's URL
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+                      });
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -27,14 +39,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
 // Registering the repository and provider interfaces with their implementations
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProvider, UserProvider>();
 builder.Services.AddScoped<IUserLocationRepository, UserLocationRepository>();
 builder.Services.AddScoped<IUserLocationProvider, UserLocationProvider>();
-builder.Services.AddScoped<IUserLocationRepository, UserLocationRepository>();
 builder.Services.AddScoped<JwtTokenService>();
+
 // Add controllers
 builder.Services.AddControllers();
 
@@ -56,6 +67,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowSpecificOrigin"); // Apply the CORS policy
 
 app.UseAuthorization();
 

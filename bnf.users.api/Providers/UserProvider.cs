@@ -11,10 +11,9 @@ namespace bnf.users.api.Providers
 {
     public interface IUserProvider
     {
-        Task<UserDetailsResponseModel> GetUserDetails(string email);
-        Task<UserRegistrationResponseModel> RegisterUser(UserRegistrationRequestModel user);
-        Task<UserLoginResponseModel> ValidateUser(UserLoginRequestModel login);
-        Task<string> AuthenticateUser(UserLoginRequestModel login);
+        Task<UserDetailsResponse> GetUserDetails(string email);
+        Task<UserRegistrationResponse> RegisterUser(UserRegistrationRequest user);
+        Task<string> AuthenticateUser(UserLoginRequest login);
     }
     public class UserProvider : IUserProvider
     {
@@ -27,30 +26,37 @@ namespace bnf.users.api.Providers
             _jwtTokenService = jwtTokenService;
         }
 
-        public async Task<UserDetailsResponseModel> GetUserDetails(string email)
+        public async Task<UserDetailsResponse> GetUserDetails(string email)
         {
-            return await _userRepository.GetUserDetails(email);
+            try
+            {
+                return await _userRepository.GetUserDetails(email);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
         }
 
-        public async Task<UserRegistrationResponseModel> RegisterUser(UserRegistrationRequestModel user)
-        {
+        public async Task<UserRegistrationResponse> RegisterUser(UserRegistrationRequest user)
+        { 
+
             return await _userRepository.RegisterUser(user);
         }
 
-        public async Task<UserLoginResponseModel> ValidateUser(UserLoginRequestModel login)
+        public async Task<string> AuthenticateUser(UserLoginRequest login)
         {
-            return await _userRepository.ValidateUser(login);
-        }
-        public async Task<string> AuthenticateUser(UserLoginRequestModel login)
-        {
-            var userLoginResponse = await _userRepository.ValidateUser(login);
+            var userLoginResponse = await _userRepository.ValidateUser(login); // Properly await the async call
             if (userLoginResponse != null && userLoginResponse.Success)
             {
                 // Generate JWT token
-                return _jwtTokenService.GenerateJwtToken(login.Username);  // Ensure 'login.Username' is correct
+                // Assuming GenerateJwtToken method is correctly implemented to accept UserLoginResponseModel or some property of it
+                return _jwtTokenService.GenerateJwtToken(userLoginResponse);  // Adjust this call as necessary
             }
             return null;
         }
-
     }
+
 }

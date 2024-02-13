@@ -19,16 +19,17 @@ namespace bnf.users.api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationRequestModel request)
+        public async Task<IActionResult> Register([FromBody] UserRegistrationRequest request)
         {
-            var response = await _userProvider.RegisterUser(request);
+            
+            var response = await _userProvider.RegisterUser(request); 
             return Ok(response);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginRequestModel request)
+        public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
         {
-            var token = await _userProvider.AuthenticateUser(request);
+             var token = await _userProvider.AuthenticateUser(request); 
             if (!string.IsNullOrEmpty(token))
             {
                 return Ok(new { Token = token });
@@ -40,7 +41,7 @@ namespace bnf.users.api.Controllers
         }
 
         [HttpGet("details")]
-        public async Task<IActionResult> GetUserDetails([FromQuery] UserDetailsRequestModel request)
+        public async Task<IActionResult> GetUserDetails([FromQuery] UserDetailsRequest request)
         {
             var response = await _userProvider.GetUserDetails(request.Email);
             if (response != null)

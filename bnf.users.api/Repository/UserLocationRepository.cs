@@ -1,5 +1,6 @@
 ﻿using bnf.users.api.Models;
 using Dapper;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace bnf.users.api.Repository
@@ -29,10 +30,21 @@ namespace bnf.users.api.Repository
 
         public async Task<bool> UpdateUserLocationAsync(UserLocationRequestModel location)
         {
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Address", location.Address);
+            parameters.Add("@City", location.City);
+            parameters.Add("@State", location.State);
+            parameters.Add("@Country", location.Country);
+            parameters.Add("@UserId", location.UserId);
+
             using (var connection = new SqlConnection(_connectionString))
             {
-                var query = "UPDATE UserLocations SET Address = @Address, City = @City, State = @State, Country = @Country, ZipCode = @ZipCode WHERE UserId = @UserId";
-                var result = await connection.ExecuteAsync(query, location);
+               var result =  await connection.ExecuteAsync(
+                "UpdateUserLocation",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+                
                 return result > 0;
             }
         }
